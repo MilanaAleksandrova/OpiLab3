@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+    <persistence-unit name="postgresPU" transaction-type="JTA">
+        <jta-data-source>java:/jboss/datasources/PostgresDS</jta-data-source>
+        <properties>
+            <property name="connection.url" value="jdbc:postgresql://pg:5432/studs?useSSL=false"></property>
+            <property name="connection.driver_class" value="org.postgresql.Driver"></property>
+            <property name="connection.username" value="s399913"></property>
+            <property name="connection.password" value="6XxJpstsMip8dlq"></property>
+
+            <!-- -->
+            <property name="hibernate.hbm2ddl.auto" value="update"></property>
+            <property name="current_session_context_class" value="thread"></property>
+            <property name="dialect" value="org.hibernate.dialect.PostgreSQLDialect"></property>
+            <property name="show_sql" value="true"></property>
+        </properties>
+    </persistence-unit>
+</persistence>

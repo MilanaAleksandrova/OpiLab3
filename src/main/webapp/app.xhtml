@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<f:view>
+    <h:head>
+        <meta charset="UTF-8"/>
+        <title>Лабораторная работа #3 — основная страница</title>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/static/css/style.css"/>
+        <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    </h:head>
+    <h:body>
+        <div class="header">
+            ФИО: Александрова Милана Сергеевна | Группа: P3214 | Вариант: 3133
+            <span class="header-link">
+                <h:link outcome="index">На стартовую</h:link>
+            </span>
+        </div>
+
+        <table class="layout">
+            <tr>
+                <td class="input-cell">
+                    <div class="input-section">
+                        <h:form id="point-form">
+                            <div class="form-group">
+                                <label for="point-form:x-value">Координата X:</label>
+                                <h:selectOneMenu id="x-value" value="#{client.coordinates.x}" styleClass="full-width-select" required="true">
+                                    <f:selectItem itemLabel="Выберите X" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{client.xValues}" var="xVal"
+                                                   itemValue="#{xVal}" itemLabel="#{xVal}"/>
+                                    <f:converter converterId="jakarta.faces.BigDecimal"/>
+                                </h:selectOneMenu>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="point-form:y-value">Координата Y:</label>
+                                <h:inputText id="y-value" value="#{client.coordinates.y}" required="true"
+                                             styleClass="text-input">
+                                    <f:passThroughAttribute name="placeholder" value="от -5 до 3"/>
+                                    <f:converter converterId="jakarta.faces.BigDecimal"/>
+                                    <f:validateDoubleRange minimum="-5" maximum="3"/>
+                                </h:inputText>
+                                <div class="input-warning" id="y-warning">Введите число от -5 до 3.</div>
+                                <h:message for="y-value" styleClass="validation-message"/>
+                            </div>
+
+                            <div class="form-group">
+                                <span>Радиус R:</span>
+                                <h:panelGroup id="radius-panel" layout="block">
+                                    <div class="radius-links" id="radius-links" data-selected-r="#{client.radiusAsString}">
+                                        <ui:repeat value="#{client.rValues}" var="rValue">
+                                            <h:commandLink value="#{rValue}"
+                                                           styleClass="radius-link"
+                                                           action="#{client.selectRadius(rValue)}"
+                                                           immediate="true"
+                                                           onclick="return window.setClientRadius(#{rValue}, this);">
+                                                <f:passThroughAttribute name="data-radius" value="#{rValue}"/>
+                                                <f:ajax execute="@this" render="radius-panel results-table script graph-form:graph-r"/>
+                                            </h:commandLink>
+                                        </ui:repeat>
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+
+                            <h:commandButton value="Проверить точку" action="#{client.makeUserRequest}"
+                                             styleClass="submit-btn">
+                                <f:ajax execute="@form" render="results-table script"/>
+                            </h:commandButton>
+                            <h:commandButton value="Очистить результаты" action="#{client.clearHits}"
+                                             styleClass="clear-btn" immediate="true">
+                                <f:ajax execute="@this" render="results-table script"/>
+                            </h:commandButton>
+
+                            <div id="error-message"></div>
+                        </h:form>
+                    </div>
+                </td>
+
+                <td class="results-cell">
+                    <div class="results-section">
+                        <div class="graph-wrapper">
+                            <div id="graph-board" class="jxgbox"></div>
+                        </div>
+
+                        <div id="current-time"></div>
+
+                        <h:dataTable id="results-table" value="#{client.currentHits}" var="hit" styleClass="result-table"
+                                     headerClass="table-header" rowClasses="table-row">
+                            <h:column>
+                                <f:facet name="header">X</f:facet>
+                                #{hit.x}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Y</f:facet>
+                                #{hit.y}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">R</f:facet>
+                                #{hit.r}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Дата и время</f:facet>
+                                #{hit.currentTime}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">Результат</f:facet>
+                                <h:outputText styleClass="#{hit.result ? 'highlight' : 'miss'}"
+                                              value="#{hit.result ? 'Попадание' : 'Промах'}"/>
+                            </h:column>
+                        </h:dataTable>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <h:form id="graph-form" prependId="false">
+            <input type="hidden" id="graph-x" name="x"/>
+            <input type="hidden" id="graph-y" name="y"/>
+            <input type="hidden" id="graph-r" name="r" value="#{client.coordinates.r}"/>
+            <h:commandButton id="graphSubmit" style="display:none" action="#{client.makeRemoteRequest}">
+                <f:ajax execute="@form" render="results-table script"/>
+            </h:commandButton>
+        </h:form>
+
+        <script type="text/javascript">
+            window.appConfig = {
+                contextPath: '#{request.contextPath}',
+                results: <h:outputText value="#{client.resultsAsJson}" escape="false"/>,
+                graphFormSubmitId: 'graphSubmit'
+            };
+        </script>
+        <script src="#{request.contextPath}/static/js/app.js"></script>
+
+        <h:panelGroup id="script">
+            <h:outputScript>
+                window.appConfig = window.appConfig || {};
+                window.appConfig.results = #{client.resultsAsJson};
+                if (window.setRadiusFromServer) {
+                    window.setRadiusFromServer(#{client.radiusAsString});
+                }
+                if (window.updateResultsFromServer) {
+                    window.updateResultsFromServer(window.appConfig.results);
+                } else if (window.redrawHitArea) {
+                    window.redrawHitArea();
+                }
+            </h:outputScript>
+        </h:panelGroup>
+    </h:body>
+</f:view>
+</html>
