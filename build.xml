@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="WebLab3" default="build">
+    <property file="build.properties"/>
+
+    <path id="project.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac
+            srcdir="${src.dir}"
+            destdir="${classes.dir}"
+            includeantruntime="false"
+            encoding="${encoding}"
+            classpathref="project.classpath">
+            <include name="**/*.java"/>
+            <compilerarg value="-processorpath"/>
+            <compilerarg path="${lib.dir}/lombok-1.18.42.jar"/>
+        </javac>
+        <copy todir="${classes.dir}">
+            <fileset dir="${resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="build" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+        <war destfile="${dist.dir}/${war.name}"
+             needxmlfile="false">
+            <classes dir="${classes.dir}"/>
+            <fileset dir="${web.dir}"/>
+            <lib dir="${lib.dir}"/>
+        </war>
+    </target>
+
+</project>
