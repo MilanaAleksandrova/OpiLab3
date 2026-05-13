@@ -40,4 +40,29 @@
         </war>
     </target>
 
+    <target name="test" depends="compile">
+        <mkdir dir="${test.classes.dir}"/>
+        <javac
+            srcdir="${test.dir}"
+            destdir="${test.classes.dir}"
+            includeantruntime="false"
+            encoding="${encoding}"
+            classpathref="project.classpath">
+            <classpath>
+                <pathelement path="${classes.dir}"/>
+            </classpath>
+            <include name="**/*.java"/>
+        </javac>
+        <java classname="org.junit.platform.console.ConsoleLauncher"
+              fork="true"
+              failonerror="true">
+            <classpath>
+                <path refid="project.classpath"/>
+                <pathelement path="${classes.dir}"/>
+                <pathelement path="${test.classes.dir}"/>
+            </classpath>
+            <arg value="--scan-classpath"/>
+        </java>
+    </target>
+
 </project>
