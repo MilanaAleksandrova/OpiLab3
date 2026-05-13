@@ -68,7 +68,7 @@
     <target name="music">
         <exec executable="powershell">
             <arg value="-c"/>
-            <arg value="(New-Object Media.SoundPlayer 'C:\Windows\Media\notify.wav').PlaySync();"/>
+            <arg value="(New-Object Media.SoundPlayer '${basedir}/bff.wav').PlaySync();"/>
         </exec>
     </target>
 
